@@ -29,7 +29,6 @@ public class PlayerMovement : MonoBehaviour
     readonly KeyCode jump = KeyCode.Space;
 
     [Header("References")]
-    [SerializeField] Transform orientation;
     [SerializeField] Transform cam;
     [SerializeField] public Transform followTransform;
 

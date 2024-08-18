@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerAimController : MonoBehaviour
 {
-
     public GameObject mainCamera;
     public GameObject aimCamera;
     public GameObject aimReticle;

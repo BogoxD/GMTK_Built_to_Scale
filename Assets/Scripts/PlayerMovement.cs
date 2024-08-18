@@ -104,7 +104,7 @@ public class PlayerMovement : MonoBehaviour
         float _lookY = Input.GetAxis("Mouse Y");
 
         followTransform.rotation *= Quaternion.AngleAxis(_lookX * rotationPower, Vector3.up);
-        followTransform.rotation *= Quaternion.AngleAxis(_lookY * rotationPower, Vector3.right);
+        followTransform.rotation *= Quaternion.AngleAxis(_lookY * rotationPower, -Vector3.right);
 
         var angles = followTransform.transform.localEulerAngles;
         angles.z = 0;

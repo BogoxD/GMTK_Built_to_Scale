@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
@@ -31,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _playerVelocity;
     private Vector3 _direction;
     private Vector3 _moveDir;
+    private float _YAxisVel;
     public bool _isGrounded;
     private float _currentSpeed;
     private float _turnSmoothVelocity;
@@ -41,13 +43,12 @@ public class PlayerMovement : MonoBehaviour
     {
         _characterController = GetComponent<CharacterController>();
     }
-
     private void Update()
     {
         OnInput();
-        Move();
+        ApplyRotation();
+        ApplyMovement();
         GroundCheck();
-        ApplyGravity();
     }
     private void OnInput()
     {
@@ -61,25 +62,25 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(jump) && _isGrounded)
             Jump();
     }
-    private void Move()
+    private void ApplyMovement()
     {
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
         _direction = new Vector3(horizontal, 0, vertical).normalized;
 
-        //apply rotation before moving
-        ApplyRotation();
-
         //on ground
         if (_isGrounded)
-            _playerVelocity = _moveDir * _currentSpeed * Time.deltaTime;
+            _playerVelocity = _moveDir * _currentSpeed;
         //in air
         else
-            _playerVelocity = _moveDir * _currentSpeed * AirMultiplier * Time.deltaTime;
+            _playerVelocity = _moveDir * _currentSpeed * AirMultiplier;
 
-        if(_direction.magnitude >= 0.01f)
-        _characterController.Move(_playerVelocity);
+        //apply gravity
+        ApplyGravity();
+
+        if (_direction.magnitude != 0f)
+            _characterController.Move(_playerVelocity * Time.deltaTime);
 
     }
     private void ApplyRotation()
@@ -94,17 +95,22 @@ public class PlayerMovement : MonoBehaviour
     }
     private void GroundCheck()
     {
-        if (Physics.Raycast(transform.position, -transform.up, _characterController.height / 2 + 0.2f, whatIsGround))
+        if (Physics.Raycast(transform.position, -transform.up, _characterController.height / 2 + 0.1f, whatIsGround))
             _isGrounded = true;
         else
             _isGrounded = false;
     }
     private void ApplyGravity()
     {
-        _moveDir.y += GravityScaleMultiplier * GravityScale * Time.deltaTime;
+        if (_isGrounded && _YAxisVel < 0.0f)
+            _YAxisVel = -1.0f;
+        else
+            _YAxisVel += GravityScaleMultiplier * GravityScale * Time.deltaTime;
+
+        _playerVelocity.y = _YAxisVel;
     }
     private void Jump()
     {
-        //_characterController.Move(_playerVelocity + new Vector3(0, JumpForce, 0));
+        _playerVelocity.y += JumpForce;
     }
 }

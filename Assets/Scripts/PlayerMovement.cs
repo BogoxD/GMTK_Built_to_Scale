@@ -18,6 +18,9 @@ public class PlayerMovement : MonoBehaviour
 
     public float TurnSmoothTime = 0.1f;
 
+    [Header("Look Movement")]
+    public float rotationPower = 10f;
+
     [Header("Ground Check")]
     public LayerMask whatIsGround;
 
@@ -28,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("References")]
     [SerializeField] Transform orientation;
     [SerializeField] Transform cam;
+    [SerializeField] public Transform followTransform;
 
     private Vector3 _playerVelocity;
     private Vector3 _direction;
@@ -47,6 +51,7 @@ public class PlayerMovement : MonoBehaviour
     {
         OnInput();
         ApplyRotation();
+        PlayerLook();
         ApplyMovement();
         GroundCheck();
     }
@@ -91,7 +96,37 @@ public class PlayerMovement : MonoBehaviour
         float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, TurnSmoothTime);
         _moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
 
-        transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        //transform.rotation = Quaternion.Euler(0f, angle, 0f);
+    }
+    private void PlayerLook()
+    {
+        float _lookX = Input.GetAxis("Mouse X");
+        float _lookY = Input.GetAxis("Mouse Y");
+
+        followTransform.rotation *= Quaternion.AngleAxis(_lookX * rotationPower, Vector3.up);
+        followTransform.rotation *= Quaternion.AngleAxis(_lookY * rotationPower, Vector3.right);
+
+        var angles = followTransform.transform.localEulerAngles;
+        angles.z = 0;
+
+        var angle = followTransform.transform.localEulerAngles.x;
+
+
+        //clamp up and down the rotation
+        if (angle > 180 && angle < 340)
+        {
+            angles.x = 340;
+        }
+        else if (angle < 180 && angle > 40)
+        {
+            angles.x = 40;
+        }
+
+        followTransform.transform.localEulerAngles = angles;
+
+        transform.rotation = Quaternion.Euler(0, followTransform.transform.rotation.eulerAngles.y, 0);
+
+        followTransform.transform.localEulerAngles = new Vector3(angles.x, 0, 0);
     }
     private void GroundCheck()
     {

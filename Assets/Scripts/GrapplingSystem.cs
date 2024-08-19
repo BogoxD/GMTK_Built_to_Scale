@@ -50,7 +50,6 @@ public class GrapplingSystem : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, rayLenght, whatIsGrappable))
         {
             //ray intersected collider
-            Debug.Log(hit.collider);
 
             firePoint.LookAt(hit.point);
             _grabbedObject = hit.collider.gameObject;
